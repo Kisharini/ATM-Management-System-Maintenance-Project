@@ -9,7 +9,7 @@ public class AtmMainDriver
     public static void main(String[] args) 
     {
         LoginForm f = new LoginForm ();        
-        f.setVisible(true);
+        f.setVisible(false);
         f.setSize(540,350);
         f.setLocation(450,220);
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
