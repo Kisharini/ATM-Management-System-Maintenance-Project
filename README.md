@@ -4,7 +4,7 @@ This repository contains an ATM Management System project implemented in Java.
 
 ## Instructions
 
-To run the program, follow these steps: ##
+To run the program, follow these steps: --
 
 1. Run the `AtmMainDriver` file. 
 2. No additional packages need to be downloaded.
