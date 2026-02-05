@@ -282,7 +282,21 @@ public class AfterLogin extends JFrame implements ActionListener
             
    /******************************************************************************************************************************/                             
     
-    
+   //Update dailyWithdrawn
+	atm.startbalance = String.valueOf(f);
+	atm.dailyWithdrawn += e;   // update daily withdrawn amount
+
+    // Check daily withdrawal limit
+	if (atm.dailyWithdrawn + e > atm.dailyLimit){
+    JOptionPane.showMessageDialog(
+        null,
+        "Daily withdrawal limit exceeded.\nRemaining limit: RM " +
+        (atm.dailyLimit - atm.dailyWithdrawn),
+        "LIMIT EXCEEDED",
+        JOptionPane.WARNING_MESSAGE
+    );
+    return;
+	}
     
     
     }  
