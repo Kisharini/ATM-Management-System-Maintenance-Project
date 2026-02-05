@@ -109,8 +109,11 @@ public class Admin extends JFrame implements ActionListener
 			pw1.print("PINCODE\t\t\tCUSTOMER NAME\t\t      ACCOUNT TYPE\t\tACCOUNT NUMBER\t\tSTARTING BALANCE\n");	
 			for (int i=0;i<customerlist.size(); i++)
 			{
+				//Persist dailyWithdrawn
 				atm=(AccountData)customerlist.get(i);
-				line=atm.pincode+","+atm.customername+","+atm.accounttype+","+atm.accountnumber+","+atm.startbalance+"\n";		
+				line = atm.pincode + "," + atm.customername + "," + atm.accounttype + "," +
+    					atm.accountnumber + "," + atm.startbalance + "," +
+       					atm.dailyWithdrawn + "\n";		
 				line1=atm.pincode+"\t\t\t"+atm.customername+"\t\t\t"+atm.accounttype+"\t\t\t"+atm.accountnumber+"\t\t\t"+atm.startbalance;
 				pw1.println(line1);
 				pw.print(line);
