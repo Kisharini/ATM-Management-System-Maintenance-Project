@@ -22,7 +22,8 @@ public class Admin extends JFrame implements ActionListener
     JButton addAccount,deleteAccount,editAccount,saveToFile,logOut;  
     JLabel atmLab;
     Container con;
-    ArrayList customerlist;
+    ArrayList<AccountData> customerlist;
+	Admin adm = new Admin();
     String s1,s2,s3;
     Admin()
     {

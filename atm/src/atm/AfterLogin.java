@@ -11,8 +11,7 @@ public class AfterLogin extends JFrame implements ActionListener
     JButton equiryBtn,withdrawBtn,logoutBtn,transferBtn;  
     JLabel atmLab;
     Container con;
-    ArrayList customerlist;
-    Admin adm = new Admin();
+    ArrayList<AccountData> customerlist;
     String s1;
     
     AfterLogin()
@@ -20,6 +19,7 @@ public class AfterLogin extends JFrame implements ActionListener
         
         super("Transaction");
         customerlist=new ArrayList();
+		loadPersons();
         
         con = this.getContentPane();
         con.setLayout(null);
