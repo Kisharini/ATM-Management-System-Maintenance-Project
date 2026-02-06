@@ -1,19 +1,19 @@
 package atm;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
 import java.util.*;
 import javax.swing.*;
-import java.io.*;
  
 public class AfterLogin extends JFrame implements ActionListener
 {
     
-    JButton equiryBtn,withdrawBtn,logoutBtn,transferBtn,depositBtn;  
+    JButton equiryBtn,withdrawBtn,logoutBtn,transferBtn,depositBtn,transactionHistoryButton;  
     JLabel atmLab;
     Container con;
     ArrayList customerlist;
-    Admin adm = new Admin();
     String s1;
+    String pincode;
     
     AfterLogin()
     {
@@ -40,7 +40,11 @@ public class AfterLogin extends JFrame implements ActionListener
         
         depositBtn = new JButton("Deposit Money");
         depositBtn.setBounds(135,180,150,40);
-     
+        
+        transactionHistoryButton = new JButton("Transaction History");
+        transactionHistoryButton.setBounds(200,300,180,30);
+        transactionHistoryButton.setFont(new Font("Arial", Font.BOLD, 14));
+        
         logoutBtn = new JButton("Logout");
         logoutBtn.setBounds(10,230,150,40);
                
@@ -49,6 +53,7 @@ public class AfterLogin extends JFrame implements ActionListener
        con.add(withdrawBtn);
        con.add(transferBtn);
        con.add(depositBtn);
+       con.add(transactionHistoryButton);
        con.add(logoutBtn);
     /********************************************************************/
     
@@ -56,6 +61,7 @@ public class AfterLogin extends JFrame implements ActionListener
     transferBtn.addActionListener(this);
     withdrawBtn.addActionListener(this);
     depositBtn.addActionListener(this);
+    transactionHistoryButton.addActionListener(this);
     logoutBtn.addActionListener(this);
    
     loadPersons();
@@ -99,19 +105,79 @@ public class AfterLogin extends JFrame implements ActionListener
 
 /***************************************************************************************************************************/
 
+/********************************************************* Transaction Logging Method *************************************/
+private void logTransaction(String type, double amount, double newBalance) {
+    String filename = "transactions_" + this.pincode + ".txt";
+    try {
+        FileWriter fw = new FileWriter(filename, true);
+        BufferedWriter bw = new BufferedWriter(fw);
+        
+        // Get current timestamp
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String timestamp = sdf.format(new java.util.Date());
+        
+        // Write transaction details
+        bw.write(type + " | " + amount + " | " + newBalance + " | " + timestamp);
+        bw.newLine();
+        bw.close();
+        fw.close();
+    } catch(IOException ioEX) {
+        System.out.println(ioEX);
+    }
+}
 
-/********************************************************* Balance Enquiry of Customer ************************************/        
-	public void inquiry(String n)
-	{
-		for(int i=0;i<customerlist.size();i++)
-		{
-			AccountData atm=(AccountData)customerlist.get(i);
-			if(n.equals(atm.pincode))
-			{
-				JOptionPane.showMessageDialog(null,"Welcome to your atm data Mr  ."+atm.customername+"\nYour Total Cash Is : "+atm.startbalance,"WELCOME WELCOME MR  "+atm.customername,JOptionPane.INFORMATION_MESSAGE);
-			}
-		}
-	}
+/***************************************************************************************************************************/
+
+/********************************************************* View Transaction History *************************************/
+public void viewTransactionHistory(String pincode) {
+    String filename = "transactions_" + pincode + ".txt";
+    try {
+        FileReader fr = new FileReader(filename);
+        BufferedReader br = new BufferedReader(fr);
+        
+        ArrayList<String> transactions = new ArrayList<>();
+        String line = br.readLine();
+        
+        while(line != null) {
+            transactions.add(line);
+            line = br.readLine();
+        }
+        br.close();
+        fr.close();
+        
+        // Display last 10 transactions
+        StringBuilder history = new StringBuilder();
+        int start = Math.max(0, transactions.size() - 10);
+        
+        if(transactions.isEmpty()) {
+            history.append("No transactions found.");
+        } else {
+            history.append("Last ").append(Math.min(10, transactions.size())).append(" Transactions:\n\n");
+            for(int i = start; i < transactions.size(); i++) {
+                history.append(transactions.get(i)).append("\n");
+            }
+        }
+        
+        JOptionPane.showMessageDialog(null, history.toString(), "Transaction History", JOptionPane.INFORMATION_MESSAGE);
+    } catch(IOException ioEX) {
+        JOptionPane.showMessageDialog(null, "No transaction history found for this account.", "Transaction History", JOptionPane.INFORMATION_MESSAGE);
+    }
+}
+
+/***************************************************************************************************************************/
+
+
+/********************************************************* Balance Enquiry of Customer ************************************/
+    private void inquiry(String k) {
+        for(int i=0;i<customerlist.size();i++) {
+            AccountData atm=(AccountData)customerlist.get(i);
+            if(k.equals(atm.pincode)) {
+                this.pincode = k;
+                JOptionPane.showMessageDialog(null,"Welcome to your atm data Mr  ."+atm.customername+"\nYour Total Cash Is : "+atm.startbalance,"WELCOME WELCOME MR  "+atm.customername,JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+    }        
+
 /***************************************************************************************************************************/
 
 
@@ -131,10 +197,17 @@ public class AfterLogin extends JFrame implements ActionListener
 				d=Integer.parseInt(a);
 
 				c=JOptionPane.showInputDialog(null,"Enter The Account Number To whom you Transfer Amount","MONEY TRANSACTION MENU",JOptionPane.QUESTION_MESSAGE);
-				b=JOptionPane.showInputDialog(null,"Enter The Amount To Transfer","MONEYTRANSACTION MENU",JOptionPane.QUESTION_MESSAGE);
-				e=Integer.parseInt(b);
-
-				f=d-e;
+				//CR02- validation & error handling for balance transfer 
+        		try {
+            		b = JOptionPane.showInputDialog(null,"Enter The Amount To Transfer", "MONEY TRANSACTION MENU",JOptionPane.QUESTION_MESSAGE);
+          			e = Integer.parseInt(b);
+          			if (e <= 0) {
+            			throw new NumberFormatException();
+          			}
+        				} catch (NumberFormatException ex) {JOptionPane.showMessageDialog(null,"Invalid input. Please enter a valid numeric amount.","Input Error",JOptionPane.ERROR_MESSAGE);
+         				return;
+        			}
+        		f = d - e;
 				while(f < 0)
 				{
 					a=atm.startbalance;
@@ -147,6 +220,8 @@ public class AfterLogin extends JFrame implements ActionListener
 				String u=String.valueOf(f);
 				atm.startbalance=u;
 				
+			logTransaction("Transfer", (double)e, (double)f);
+			
 				JOptionPane.showMessageDialog(null,"Transaction is done succesfully\n\nAmount of "+b+"is transferd To "+c+"\n\nYour Total Cash Is : "+atm.startbalance,"MONEY TRANSACTION PROCESSED",JOptionPane.INFORMATION_MESSAGE);
 				
                                 Admin as = new Admin();
@@ -172,10 +247,17 @@ public class AfterLogin extends JFrame implements ActionListener
 				a=atm.startbalance;
 				d=Integer.parseInt(a);
 
-				b=JOptionPane.showInputDialog(null,"Enter The Amout To Withdarw","WITHDARW MENU",JOptionPane.QUESTION_MESSAGE);
-				e=Integer.parseInt(b);
-
-				f=d-e;
+				//CR02-validation & error handling for withdraw  balance
+    			try {
+          		b = JOptionPane.showInputDialog(null,"Enter The Amount To Withdraw","WITHDRAW MENU",JOptionPane.QUESTION_MESSAGE);
+          		e = Integer.parseInt(b);
+          		if (e <= 0) {
+            		throw new NumberFormatException();
+          		}
+        			} catch (NumberFormatException ex) {JOptionPane.showMessageDialog(null,"Invalid input. Please enter a valid numeric amount.","Input Error",JOptionPane.ERROR_MESSAGE);
+        			return;
+     			}
+      			f = d - e;
 
 				while(f <0)
 				{
@@ -188,8 +270,9 @@ public class AfterLogin extends JFrame implements ActionListener
 					f=d-e;
 				}
 				c=String.valueOf(f);
-				atm.startbalance=c;
-				JOptionPane.showMessageDialog(null,"Withdarw proccesed\nYou have Withdarwed Amount of"+b+"\nYour Total Cash Is now: "+atm.startbalance,"Information",JOptionPane.INFORMATION_MESSAGE);
+				atm.startbalance=c;			
+			logTransaction("Withdraw", (double)e, (double)f);
+							JOptionPane.showMessageDialog(null,"Withdarw proccesed\nYou have Withdarwed Amount of"+b+"\nYour Total Cash Is now: "+atm.startbalance,"Information",JOptionPane.INFORMATION_MESSAGE);
 				Admin ad = new Admin();
                                 ad.savePerson();
 			}
@@ -236,6 +319,10 @@ public class AfterLogin extends JFrame implements ActionListener
 					c=String.valueOf(f);
 					atm.startbalance=c;
 					
+					// Log transaction for deposit
+					this.pincode = pincode;
+					logTransaction("Deposit", (double)e, (double)f);
+					
 					JOptionPane.showMessageDialog(null,"Deposit Processed Successfully\n\nYou have Deposited Amount of "+b+"\nYour Total Cash Is now: "+atm.startbalance,"Information",JOptionPane.INFORMATION_MESSAGE);
 					
 					// Save to file
@@ -261,6 +348,7 @@ public class AfterLogin extends JFrame implements ActionListener
 	if(b == equiryBtn)
         {		
             s1= JOptionPane.showInputDialog(null,"Enter PinCode To Check Account Balance ","Check Balance",JOptionPane.QUESTION_MESSAGE);
+            this.pincode = s1;
             
             
             		for(int i=0;i<customerlist.size();i++)
@@ -284,6 +372,7 @@ public class AfterLogin extends JFrame implements ActionListener
         if(b == withdrawBtn)
         {
           s1=JOptionPane.showInputDialog(null,"Enter PinCode To withDraw Balance ","Withdraw Balance",JOptionPane.QUESTION_MESSAGE);
+          this.pincode = s1;
            for(int i=0;i<customerlist.size();i++)
 		{
 			AccountData atm=(AccountData)customerlist.get(i);
@@ -297,7 +386,7 @@ public class AfterLogin extends JFrame implements ActionListener
                          else if(!s1.equals(atm.pincode))
 			{
 				JOptionPane.showMessageDialog(null,"You have entered Wrong Pincode \nPlease Enter Valid Pincode!!!!","Warning",JOptionPane.WARNING_MESSAGE);
-					
+				
 			}
                 }
         }
@@ -306,6 +395,7 @@ public class AfterLogin extends JFrame implements ActionListener
         if(b == transferBtn)
         {
              s1=JOptionPane.showInputDialog(null,"Enter PinCode To Transfer Balance ","Share balance",JOptionPane.QUESTION_MESSAGE);
+             this.pincode = s1;
            	
              for(int i=0;i<customerlist.size();i++)
 		{
@@ -329,6 +419,7 @@ public class AfterLogin extends JFrame implements ActionListener
         if(b == depositBtn)
         {
             s1=JOptionPane.showInputDialog(null,"Enter PinCode To Deposit Money","Deposit Balance",JOptionPane.QUESTION_MESSAGE);
+            this.pincode = s1;
             
             if(s1 == null || s1.isEmpty())
             {
@@ -351,6 +442,27 @@ public class AfterLogin extends JFrame implements ActionListener
             if(!found)
             {
                 JOptionPane.showMessageDialog(null,"You have entered Wrong Pincode \nPlease Enter Valid Pincode!!!!","Warning",JOptionPane.WARNING_MESSAGE);
+            }
+        }
+        
+/******************************************************************************************************************************/
+
+        if(b == transactionHistoryButton)
+        {
+            s1= JOptionPane.showInputDialog(null,"Enter PinCode To View Transaction History ","Transaction History",JOptionPane.QUESTION_MESSAGE);
+            
+            for(int i=0;i<customerlist.size();i++)
+            {
+                AccountData atm=(AccountData)customerlist.get(i);
+                
+                if(s1.equals(atm.pincode))
+                {
+                    viewTransactionHistory(s1);
+                }
+                else if(!s1.equals(atm.pincode))
+                {
+                    JOptionPane.showMessageDialog(null,"You have entered Wrong Pincode \nPlease Enter Valid Pincode!!!!","Warning",JOptionPane.WARNING_MESSAGE);
+                }
             }
         }
         

@@ -7,7 +7,7 @@ import javax.swing.*;
 
 public class LoginForm extends JFrame implements ActionListener
 {
-    
+    private static final long serialVersionUID = 1L;
 
     JPanel panel;
     JLabel lab1,lab2,picLab,userLab,adminLab;
