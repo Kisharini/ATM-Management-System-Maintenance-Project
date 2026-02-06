@@ -192,10 +192,17 @@ public void viewTransactionHistory(String pincode) {
 				d=Integer.parseInt(a);
 
 				c=JOptionPane.showInputDialog(null,"Enter The Account Number To whom you Transfer Amount","MONEY TRANSACTION MENU",JOptionPane.QUESTION_MESSAGE);
-				b=JOptionPane.showInputDialog(null,"Enter The Amount To Transfer","MONEYTRANSACTION MENU",JOptionPane.QUESTION_MESSAGE);
-				e=Integer.parseInt(b);
-
-				f=d-e;
+				//CR02- validation & error handling for balance transfer 
+        		try {
+            		b = JOptionPane.showInputDialog(null,"Enter The Amount To Transfer", "MONEY TRANSACTION MENU",JOptionPane.QUESTION_MESSAGE);
+          			e = Integer.parseInt(b);
+          			if (e <= 0) {
+            			throw new NumberFormatException();
+          			}
+        				} catch (NumberFormatException ex) {JOptionPane.showMessageDialog(null,"Invalid input. Please enter a valid numeric amount.","Input Error",JOptionPane.ERROR_MESSAGE);
+         				return;
+        			}
+        		f = d - e;
 				while(f < 0)
 				{
 					a=atm.startbalance;
@@ -235,10 +242,17 @@ public void viewTransactionHistory(String pincode) {
 				a=atm.startbalance;
 				d=Integer.parseInt(a);
 
-				b=JOptionPane.showInputDialog(null,"Enter The Amout To Withdarw","WITHDARW MENU",JOptionPane.QUESTION_MESSAGE);
-				e=Integer.parseInt(b);
-
-				f=d-e;
+				//CR02-validation & error handling for withdraw  balance
+    			try {
+          		b = JOptionPane.showInputDialog(null,"Enter The Amount To Withdraw","WITHDRAW MENU",JOptionPane.QUESTION_MESSAGE);
+          		e = Integer.parseInt(b);
+          		if (e <= 0) {
+            		throw new NumberFormatException();
+          		}
+        			} catch (NumberFormatException ex) {JOptionPane.showMessageDialog(null,"Invalid input. Please enter a valid numeric amount.","Input Error",JOptionPane.ERROR_MESSAGE);
+        			return;
+     			}
+      			f = d - e;
 
 				while(f <0)
 				{
