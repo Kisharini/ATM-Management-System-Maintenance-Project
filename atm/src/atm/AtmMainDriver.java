@@ -1,7 +1,4 @@
 package atm;
-import java.awt.Color;
-import java.awt.event.*;
-import java.util.*;
 import javax.swing.*;
 
 public class AtmMainDriver 
@@ -17,3 +14,4 @@ public class AtmMainDriver
     }
     
 }
+

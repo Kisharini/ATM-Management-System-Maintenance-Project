@@ -2,9 +2,9 @@ package atm;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.event.*;
+import java.io.*;
 import java.util.*;
 import javax.swing.*;
-import java.io.*;
 
 /*\ I have to add these options
     Add Account
@@ -23,7 +23,7 @@ public class Admin extends JFrame implements ActionListener
     JLabel atmLab;
     Container con;
     ArrayList customerlist;
-    String s1,s2,s3;
+    String s1;
     Admin()
     {
         super("ADMIN");
@@ -67,7 +67,42 @@ public class Admin extends JFrame implements ActionListener
     saveToFile.addActionListener(this);
     logOut.addActionListener(this);
     
+    loadPersons();
+    }
     
+    /*******************************LOAD ACCOUNT FROM FILE*******************************************/
+    public void loadPersons()
+    {
+        String ss[]=null;
+        String pincode,customername,accounttype,accountnumber,startbalance;
+        
+        try
+        {
+            FileReader fr=new FileReader("Customer Record.txt");
+            BufferedReader br=new BufferedReader(fr);
+            
+            String line=br.readLine();  
+            
+            while(line != null)
+            {
+                ss=line.split(",");
+                pincode=ss[0];
+                customername=ss[1];
+                accounttype=ss[2];
+                accountnumber=ss[3];
+                startbalance=ss[4];
+                
+                AccountData atm=new AccountData(pincode,customername,accounttype,accountnumber,startbalance);
+                customerlist.add(atm);
+                line=br.readLine();
+            }
+            br.close();
+            fr.close();
+        }
+        catch(IOException ioEX)
+        {
+            System.out.println("No existing customer records found. Starting fresh.");
+        }
     }
     
     /*******************************ADD ACCOUNT************************************************/
@@ -109,11 +144,8 @@ public class Admin extends JFrame implements ActionListener
 			pw1.print("PINCODE\t\t\tCUSTOMER NAME\t\t      ACCOUNT TYPE\t\tACCOUNT NUMBER\t\tSTARTING BALANCE\n");	
 			for (int i=0;i<customerlist.size(); i++)
 			{
-				//Persist dailyWithdrawn
 				atm=(AccountData)customerlist.get(i);
-				line = atm.pincode + "," + atm.customername + "," + atm.accounttype + "," +
-    					atm.accountnumber + "," + atm.startbalance + "," +
-       					atm.dailyWithdrawn + "\n";		
+				line=atm.pincode+","+atm.customername+","+atm.accounttype+","+atm.accountnumber+","+atm.startbalance+"\n";		
 				line1=atm.pincode+"\t\t\t"+atm.customername+"\t\t\t"+atm.accounttype+"\t\t\t"+atm.accountnumber+"\t\t\t"+atm.startbalance;
 				pw1.println(line1);
 				pw.print(line);
@@ -221,6 +253,7 @@ public class Admin extends JFrame implements ActionListener
     /************************************************************************************************************/
     
     /***************************************************************************************************/
+    @Override
     public void actionPerformed(ActionEvent e)
     {
 
