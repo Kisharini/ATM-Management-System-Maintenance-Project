@@ -8,7 +8,7 @@ import javax.swing.*;
 public class AfterLogin extends JFrame implements ActionListener
 {
     
-    JButton equiryBtn,withdrawBtn,logoutBtn,transferBtn,transactionHistoryButton;  
+    JButton equiryBtn,withdrawBtn,logoutBtn,transferBtn,depositBtn,transactionHistoryButton;  
     JLabel atmLab;
     Container con;
     ArrayList customerlist;
@@ -38,6 +38,9 @@ public class AfterLogin extends JFrame implements ActionListener
         withdrawBtn = new JButton("WithDraw Money");
         withdrawBtn.setBounds(260,230,150,40);
         
+        depositBtn = new JButton("Deposit Money");
+        depositBtn.setBounds(135,180,150,40);
+        
         transactionHistoryButton = new JButton("Transaction History");
         transactionHistoryButton.setBounds(200,300,180,30);
         transactionHistoryButton.setFont(new Font("Arial", Font.BOLD, 14));
@@ -49,6 +52,7 @@ public class AfterLogin extends JFrame implements ActionListener
        con.add(equiryBtn);
        con.add(withdrawBtn);
        con.add(transferBtn);
+       con.add(depositBtn);
        con.add(transactionHistoryButton);
        con.add(logoutBtn);
     /********************************************************************/
@@ -56,6 +60,7 @@ public class AfterLogin extends JFrame implements ActionListener
     equiryBtn.addActionListener(this);
     transferBtn.addActionListener(this);
     withdrawBtn.addActionListener(this);
+    depositBtn.addActionListener(this);
     transactionHistoryButton.addActionListener(this);
     logoutBtn.addActionListener(this);
    
@@ -276,6 +281,63 @@ public void viewTransactionHistory(String pincode) {
 /********************************************************************************************************************************/
 
 
+/********************************************************* Deposit Balance ******************************************************/        
+	public void deposit(String pincode)
+	{
+		String a,b,c;
+		int d,e,f;
+
+		for(int i=0;i<customerlist.size();i++)
+		{
+			AccountData atm=(AccountData)customerlist.get(i);
+			if(pincode.equals(atm.pincode))
+			{
+				a=atm.startbalance;
+				d=Integer.parseInt(a);
+
+				b=JOptionPane.showInputDialog(null,"Enter The Amount To Deposit","DEPOSIT MENU",JOptionPane.QUESTION_MESSAGE);
+				
+				// Input validation
+				if(b == null || b.isEmpty())
+				{
+					JOptionPane.showMessageDialog(null,"Deposit cancelled","Information",JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+				
+				try
+				{
+					e=Integer.parseInt(b);
+					
+					// Validate positive amount
+					if(e <= 0)
+					{
+						JOptionPane.showMessageDialog(null,"Invalid Amount\nPlease Enter A Positive Amount To Deposit","DEPOSIT MENU",JOptionPane.WARNING_MESSAGE);
+						return;
+					}
+
+					f=d+e; // Add deposit amount to current balance
+					c=String.valueOf(f);
+					atm.startbalance=c;
+					
+					// Log transaction for deposit
+					this.pincode = pincode;
+					logTransaction("Deposit", (double)e, (double)f);
+					
+					JOptionPane.showMessageDialog(null,"Deposit Processed Successfully\n\nYou have Deposited Amount of "+b+"\nYour Total Cash Is now: "+atm.startbalance,"Information",JOptionPane.INFORMATION_MESSAGE);
+					
+					// Save to file
+					Admin ad = new Admin();
+					ad.savePerson();
+				}
+				catch(NumberFormatException nfe)
+				{
+					JOptionPane.showMessageDialog(null,"Invalid Input\nPlease Enter A Valid Number","ERROR",JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		}
+	}
+/********************************************************************************************************************************/
+
 
 /*************************************** ActionListener Code for Buttons ***********************************************************/
     
@@ -350,6 +412,37 @@ public void viewTransactionHistory(String pincode) {
                             transfer(s1);
                         }            
                 }        
+        }
+        
+/******************************************************************************************************************************/
+        
+        if(b == depositBtn)
+        {
+            s1=JOptionPane.showInputDialog(null,"Enter PinCode To Deposit Money","Deposit Balance",JOptionPane.QUESTION_MESSAGE);
+            this.pincode = s1;
+            
+            if(s1 == null || s1.isEmpty())
+            {
+                return; // User cancelled
+            }
+            
+            boolean found = false;
+            for(int i=0;i<customerlist.size();i++)
+            {
+                AccountData atm=(AccountData)customerlist.get(i);
+
+                if(s1.equals(atm.pincode))
+                {
+                    found = true;
+                    deposit(s1);
+                    break;
+                }
+            }
+            
+            if(!found)
+            {
+                JOptionPane.showMessageDialog(null,"You have entered Wrong Pincode \nPlease Enter Valid Pincode!!!!","Warning",JOptionPane.WARNING_MESSAGE);
+            }
         }
         
 /******************************************************************************************************************************/
