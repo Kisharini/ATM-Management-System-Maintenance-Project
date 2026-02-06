@@ -1,9 +1,9 @@
 package atm;
 
-import java.awt.event.*;
-import javax.swing.*;
-import java.io.*;
 import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import javax.swing.*;
 
 public class LoginForm extends JFrame implements ActionListener
 {
@@ -107,8 +107,8 @@ public class LoginForm extends JFrame implements ActionListener
                 fr = new FileReader("loginInfo.txt");
                 br = new BufferedReader(fr);
 	
-                s1 = br.readLine();
-                s4 = br.readLine();     // for Password
+                s1 = br.readLine().trim();
+                s4 = br.readLine().trim();     // for Password
        
                 char [] p = Pfield.getPassword();
                  password = new String(p);                
@@ -128,7 +128,7 @@ public class LoginForm extends JFrame implements ActionListener
              { 
                  JOptionPane.showMessageDialog(null,"ENTER YOUR Password"); 
              }
-                  else if(!Tfield.getText().equals(s1) && !password.equals(s4))
+                  else if(!Tfield.getText().equals(s1) || !password.equals(s4))
                         { 
                 JOptionPane.showMessageDialog(null,"WRONG USERNAME AND PASSWORD"); 
                         }
